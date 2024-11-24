@@ -30,7 +30,7 @@ This project is a Flask-based web application that leverages a Convolutional Neu
 
 ### 1. Clone the Repository  
 ```sh
-git clone https://github.com/your-username/pneumonia-detection.git
+git clone https://github.com/srikarr3/Pneumonia-Detection.git
 cd pneumonia-detection
 ```
 ### 2. Install Dependencies
