@@ -49,6 +49,11 @@ Open your browser and navigate to:
 ```sh
 http://127.0.0.1:5000
 ```
+### Model
+**For model refer this :**
+```sh
+https://colab.research.google.com/drive/1ccU48B4vV8xlMgi1RReunO7bAlM5a3RA#scrollTo=h7YIsf5Y3AIy
+```
 
 ## 📚 Tools and Libraries  
 
