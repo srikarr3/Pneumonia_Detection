@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pneumonia Detection</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      color: #007bff;
+    }
+
+    #upload-box {
+      border: 2px dashed #007bff;
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 320px;
+      height: 200px;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #007bff;
+      background-color: #e9f6ff;
+      transition: background-color 0.3s ease;
+    }
+
+    #upload-box.drag-over {
+      background-color: #d1e7ff;
+      border-color: #0056b3;
+    }
+
+    #upload-box:hover {
+      background-color: #d1e7ff;
+      border-color: #0056b3;
+    }
+
+    #upload-box p {
+      margin: 0;
+      font-size: 1.2em;
+    }
+
+    img {
+      margin-top: 20px;
+      width: 350px;
+      height: 350px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #result {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+      margin-top: 20px;
+      background-color: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #submit-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    #clear-btn {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    #clear-btn:hover {
+      background-color: #5a6268;
+    }
+
+    footer {
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pneumonia Detection</h1>
+  <div id="upload-box">
+    <p>Drop image here or click to select</p>
+  </div>
+  <input type="file" id="file-input" accept="image/*" style="display: none;">
+  <img id="uploaded-image" alt="Uploaded Preview" style="display: none;">
+  <button id="submit-btn" class="btn">Submit</button>
+  <button id="clear-btn" class="btn">Clear</button>
+  <div id="result"></div>
+  
+  <footer>
+    <p>Developed with ❤️ by CSE T <a  target="_blank"></a></p>
+  </footer>
+
+  <script>
+    const uploadBox = document.getElementById('upload-box');
+    const fileInput = document.getElementById('file-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const result = document.getElementById('result');
+    const uploadedImage = document.getElementById('uploaded-image');
+    let selectedFile = null;
+
+    // Handle drag and drop
+    uploadBox.addEventListener('click', () => fileInput.click());
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.classList.add('drag-over');
+    });
+    uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('drag-over'));
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        selectedFile = files[0];
+        uploadBox.textContent = selectedFile.name;
+        displayImage(selectedFile);
+      }
+    });
+
+    // Handle file input selection
+    fileInput.addEventListener('change', (e) => {
+      selectedFile = e.target.files[0];
+      if (selectedFile) {
+        uploadBox.textContent = selectedFile.name;
+        displayImage(selectedFile);
+      }
+    });
+
+    // Display selected image
+    function displayImage(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImage.src = e.target.result;
+        uploadedImage.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Handle submit button
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile) {
+        alert("Please select an image.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target.result.split(',')[1];
+        try {
+          const response = await fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(base64Image),
+          });
+          const data = await response.json();
+          result.textContent = `Prediction: ${data.result}`;
+        } catch (error) {
+          result.textContent = "Error: Could not get prediction.";
+          console.error(error);
+        }
+      };
+      reader.readAsDataURL(selectedFile);
+    });
+
+    // Handle clear button
+    clearBtn.addEventListener('click', () => {
+      selectedFile = null;
+      fileInput.value = null;
+      uploadBox.textContent = "Drop image here or click to select";
+      result.textContent = "";
+      uploadedImage.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
